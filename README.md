@@ -50,7 +50,8 @@ Some combination of GPL2+ from makeself ( https://github.com/megastep/makeself )
 
 ## TODO
 
-~~1. initial release ~~
+
+1. initial release 
 2. some testing, both local on single architectures. 
 3. version # 
 4. some visual use examples. 
@@ -149,10 +150,23 @@ drwxrwxr-x 3 x x    4096 Sep 25 18:28 .
 
 hello_wide_world: POSIX shell script executable (binary data)
 
-# $user : 
+# $user : mkdir tmp ; cd tmp ; mv ../hello_wide_world . ; ./hello_wide_world  a b c 
+Hello World!
+args : 
+   0 : (goos_goarch/linux_amd64/hello_wide_world)
+   1 : (a)
+   2 : (b)
+   3 : (c)
+
+wd : ... src/github.com/gulfie/gobme/hello_wide_world/tmp/hello_wide_world.unpacked
+
+Linux desk6 4.4.0-93-generic #116-Ubuntu SMP Fri Aug 11 21:17:51 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
+Good bye World! Everything ended well enough.
+x@desk6:
 
 
 ```
+(oh nuts... the fist official issue, the WD is wrong on first exec.... nuts ) 
   
 
 
