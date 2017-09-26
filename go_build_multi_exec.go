@@ -157,11 +157,11 @@ func cleanAndBuild(goos, goarch string) (outerr string,  err error) {
 			//build nil versions in whatever the user thinks is wise, e.g. whatever the current GOOS and GOARCH are in. 
 			newenv  := os.Environ()
 
-			if "" == goos{
+			if "" != goos{
 				newenv = append(newenv , "GOOS="+goos)
 			}
 
-			if "" ==  goarch{
+			if "" !=  goarch{
 				newenv = append(newenv , "GOARCH="+goarch) 
 			}
 

@@ -5,3 +5,5 @@ tmp*
 go_build_multi_exec
 makeself.sh
 makeself-header.sh
+gobme
+*.swp
