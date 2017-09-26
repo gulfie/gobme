@@ -1,0 +1,7 @@
+*.out
+tmp*
+*.unpacked
+*.old
+go_build_multi_exec
+makeself.sh
+makeself-header.sh

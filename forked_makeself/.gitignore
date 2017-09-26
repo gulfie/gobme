@@ -1,0 +1,6 @@
+*.out
+tmp*
+*.unpacked
+*.old
+!makeself.sh
+!makeself-header.sh
