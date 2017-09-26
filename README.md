@@ -43,15 +43,21 @@ Some flags are supported, --help for more details.   For speed I'd recomend "gob
 
 
 ## License:
-	Some combination of GPL2+ from makeself ( https://github.com/megastep/makeself ) and artistic / oh please be careful with it I haven't even started serious testing yet. 
+
+Some combination of GPL2+ from makeself ( https://github.com/megastep/makeself ) and artistic / oh please be careful with it I haven't even started serious testing yet. 
+
 
 
 ## TODO
 
-1. ~~ initial release ~~
+~~1. initial release ~~
 2. some testing, both local on single architectures. 
 3. version # 
 4. some visual use examples. 
+5. cleanup the visual appearance of the output
+6. document the hidden sidechannel commands
+7. possibly migrate processing out of the CWD and move it to a temp build dir somewhere
+8. stop leaving tailings around , e.g. *.unpacked and the *.sh tools 
 
 
 ### future possibilties. 
@@ -60,4 +66,95 @@ Some flags are supported, --help for more details.   For speed I'd recomend "gob
 2. worm based autonomic distributed computing. 
 
 
+## Examples
+
+
+Shorter simple example.  Installation and use ( asusming all your GOPATH and GOROOT is setup correctly ) 
+
+```
+
+# $user : go install github.com/gulfie/gobme
+
+# $user : cd $THE_GOPATH_PLACE_IT_WAS_INSTALLED_INTO/src/github.com/gulfie/gobme/hello_wide_world/
+
+# $user : ls -alrt 
+ total 16
+-rw-rw-r-- 1 x x  629 Sep 25 18:08 hello_wide_world.go
+-rw-rw-r-- 1 x x   17 Sep 25 18:08 .gitignore
+drwxrwxr-x 7 x x 4096 Sep 25 18:24 ..
+drwxrwxr-x 2 x x 4096 Sep 25 18:24 .
+
+# $user : gobme --goos linux,openbsd,dragonfly --goarch 386,amd64,mumford
+
+Smoke Build worked... proceeding
+Working on linux 386
+    Build success!
+
+Working on linux amd64
+    Build success!
+
+Working on linux mumford
+ .. build didn't work moving on
+Working on openbsd 386
+    Build success!
+
+Working on openbsd amd64
+    Build success!
+
+Working on openbsd mumford
+ .. build didn't work moving on
+Working on dragonfly 386
+ .. build didn't work moving on
+Working on dragonfly amd64
+    Build success!
+
+Working on dragonfly mumford
+ .. build didn't work moving on
+Thank you to Stephane Peter,  http://makeself.io/ , et. al see source for license and details (GPL2+!)
+Header is 581 lines long
+
+About to compress 9912 KB of data...
+Adding files to archive named "hello_wide_world"...
+./
+./goos_goarch/
+./goos_goarch/dragonfly_amd64/
+./goos_goarch/dragonfly_amd64/hello_wide_world
+./goos_goarch/linux_amd64/
+./goos_goarch/linux_amd64/hello_wide_world
+./goos_goarch/openbsd_386/
+./goos_goarch/openbsd_386/hello_wide_world
+./goos_goarch/openbsd_amd64/
+./goos_goarch/openbsd_amd64/hello_wide_world
+./goos_goarch/linux_386/
+./goos_goarch/linux_386/hello_wide_world
+./startupscript
+CRC: 3660133747
+MD5: 7fa9732b57111dd70c72f92ff4f9f142
+
+Self-extractable archive "hello_wide_world" successfully created.
+Successfull completion maybe
+
+# $user : ls -arlt 
+total 3720
+-rw-rw-r-- 1 x x     629 Sep 25 18:08 hello_wide_world.go
+-rw-rw-r-- 1 x x      17 Sep 25 18:08 .gitignore
+drwxrwxr-x 7 x x    4096 Sep 25 18:24 ..
+-rwxr-xr-x 1 x x   18143 Sep 25 18:28 makeself.sh
+-rwxr-xr-x 1 x x   14425 Sep 25 18:28 makeself-header.sh
+drwxr-xr-x 3 x x    4096 Sep 25 18:28 hello_wide_world.unpacked
+-rwxrwxr-x 1 x x 3747982 Sep 25 18:28 hello_wide_world
+drwxrwxr-x 3 x x    4096 Sep 25 18:28 .
+ 
+# $user : file hello_wide_world
+
+hello_wide_world: POSIX shell script executable (binary data)
+
+# $user : 
+
+
+```
   
+
+
+
+

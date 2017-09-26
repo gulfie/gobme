@@ -413,7 +413,7 @@ func main(){
 	err := cmd.Run()
 
 	check(err)
-	fmt.Print("Successfull completion maybe")
+	fmt.Print("Successfull completion maybe\n")
 
 }
 
