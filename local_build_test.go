@@ -231,20 +231,37 @@ type execrecord struct {
 	jsonblob map[string]interface{}
 }
 
-func run_and_capture(cmdstr string) (er execrecord){
 
-	cmd := exec.Command(cmdstr)
+// exec style env strings. nil == what you have already 
+// convert cmdstr to  a []string
+func run_and_capture(cmdstr []string, env []string) (er execrecord){
+
+	cmd := exec.Command(cmdstr[0], cmdstr[1:]...)
 
 	var stderr ,stdout bytes.Buffer 
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 
+	if nil != env {
+
+		cmd.Env = make([]string, len(env))
+
+		for _ , v := range(env){
+			d("copying over env v (",v,")\n")
+			cmd.Env = append(cmd.Env,v)
+		}
+	}
+
 	err  := cmd.Run()
+	if nil != err {
+		d("cmd.run found an error:(",err,")\n")
+	}
 
 	er.runerr = err 
 
 	er.stdout = stdout.Bytes()
 	er.stderr = stderr.Bytes()
+
 
 	findwd := regexp.MustCompile("\nwd : (\\S+)")
 	ret := findwd.Find(stdout.Bytes())
@@ -268,6 +285,7 @@ func run_and_capture(cmdstr string) (er execrecord){
 	//	d("json unstringed : " , er.jsonblob ,"\n")
 	}
 
+	d("er out : " , er , "\n\n")
 	return er
 }
 
@@ -280,15 +298,14 @@ func interfaceslicetostringslice( inslice []interface{} ) ( outslice []string ){
 	// there must be a better way. FIX TODO, research Go idiums
 	//outslice = make([]string , len(inslice.([]interface{})))
 
-	d(" inslice ", inslice , "\n")
-	d("boop!\n");
+//	d(" inslice ", inslice , "\n")
 
 
 	for i , _ := range(inslice){
 		outslice = append(outslice, inslice[i].(string))
 	}
 
-	d(" outslice ", outslice ,"\n")
+//	d(" outslice ", outslice ,"\n")
 
 	return outslice
 }
@@ -298,7 +315,7 @@ var equalslicer = regexp.MustCompile("\\A([^=]+)=(.*)$")
 
 func envslicetomapss( env []string ) (ret map[string]string ) {
 
-	d("env env : " , env ,"\n\n\n")
+	// d("env env : " , env ,"\n\n\n")
 	ret = make(map[string]string)
 
 	// does the map show up magicly?
@@ -311,9 +328,19 @@ func envslicetomapss( env []string ) (ret map[string]string ) {
 		}
 	}
 
-	d("\nenv slice ret " , ret,"\n")
+	// d("\nenv slice ret " , ret,"\n")
 
 	return ret
+}
+
+
+func mapsstoenvslice(envmap  map[string]string ) ( environ []string ){
+
+	for k := range(envmap) { 
+		environ = append(environ , k + "=" + envmap[k] )
+	}
+
+	return environ
 }
 
 
@@ -324,7 +351,7 @@ func envslicetomapss( env []string ) (ret map[string]string ) {
 //	isdiff = comparemapsonkeys( []string { }, false , env0 , evn1 )
 func comparemapsonkeys( keyset []string, onlycheck bool, left map[string]string , right map[string]string ) (ismateriallydiff bool ){ 
 
-	d("comparemapsonkeys\n",left, right ,"\n\n")
+	// d("comparemapsonkeys\n",left, right ,"\n\n")
 	var keystolookat []string 
 
 	if onlycheck{
@@ -338,28 +365,28 @@ func comparemapsonkeys( keyset []string, onlycheck bool, left map[string]string 
 		ksmap := make(map[string]bool)
 
 		for _ , k := range  keyset {
-			d("k1 (",k,")\n")
+	//		d("k1 (",k,")\n")
 			ksmap[k] = true
 		}
 
 		for k:= range left {
-			d("k2 (",k,")\n")
+	//		d("k2 (",k,")\n")
 			kmap[k] = true
 		}
 		for k:= range right {
-			d("k3 (",k,")\n")
+	//		d("k3 (",k,")\n")
 			kmap[k] = true
 		}
 
 		for k:= range kmap {
-			d("k4 (",k,")\n")
+	//		d("k4 (",k,")\n")
 			if ! ksmap[k] { 
 				keystolookat = append(keystolookat, k)
 			}
 		}
 	}
 
-	d("keys chosen\n", keystolookat ,"\n\n")
+	// d("keys chosen\n", keystolookat ,"\n\n")
 
 	for _ , k := range keystolookat {
 		//l , r := left[k] , right[k] 
@@ -391,6 +418,72 @@ func comparemapsonkeys( keyset []string, onlycheck bool, left map[string]string 
 
 
 
+
+func testcompare_two_json_er( t *testing.T, testprefix string,  left , right execrecord)  ( isgood bool) { 
+
+	// check args
+	// next check the environments. 
+
+	// Do the same thing again, 
+	// but for executions that use relative PATH variables. 
+
+	//	d("json unstringed : " , er.jsonblob ,"\n")
+	isdiff := false 
+
+	// should check for minimum keyset on er 
+	// reading json is a pita. 
+
+	d("working on (",testprefix,")\n")
+
+
+	if _ , exists := left.jsonblob["environ"] ; ! exists  { 
+		t.Error("environ is not present in left\n")
+		isgood = false;
+	}
+
+	if _ , exists := right.jsonblob["environ"] ; ! exists  { 
+		t.Error("environ is not present in right\n")
+		isgood = false;
+	}
+
+	// there must be a better way. FIX TODO, research Go idiums
+
+	stringslice0 := make([]string , len(left.jsonblob["environ"].([]interface{})))
+
+	stringslice0 =  interfaceslicetostringslice(left.jsonblob["environ"].([]interface{})) 
+
+	env0 := envslicetomapss(stringslice0)
+
+	stringslice1 := make([]string , len(right.jsonblob["environ"].([]interface{})))
+
+	stringslice1 =  interfaceslicetostringslice(right.jsonblob["environ"].([]interface{})) 
+
+	env1 := envslicetomapss(stringslice1)
+
+	isdiff = comparemapsonkeys( []string { }, false , env0 , env1 )
+
+	d("isdiff (" , isdiff , ")\n")
+
+	if isdiff { 
+		t.Error("environment sets seem materially different, run with -args -debug to find out")
+		isgood = false;
+	}
+
+	// check argv really quick.
+	
+
+	if ! reflect.DeepEqual( left.jsonblob["args"].([]interface{})  , right.jsonblob["args"].([]interface{}) ){
+		t.Error("argument strings to the two invocations are different , see -args -debug \n")
+		isgood = false;
+	}
+
+	return isgood;
+}
+
+
+
+
+
 // 
 func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 
@@ -398,9 +491,13 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 
 	// should have our hello_wide_world archive built. 
 
-	os.MkdirAll("tmp/tmp2/tmp3/tmp4/tmp5/tmp6", 0755 )
+	e := os.MkdirAll("tmp/tmp2/tmp3/tmp4/tmp5/tmp6", 0755 )
+	if nil != e {
+		t.Error("failed to make tmpdir stack")
+		t.Fail()
+	}
 	if ! leavetmp {
-		defer os.RemoveAll("tmp")
+	//	defer os.RemoveAll("tmp")
 	}
 
 
@@ -418,14 +515,14 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 	//  pause and think for a  bit. 
 
 	// oh neat... makeself helpfully pops up a window with startup script output (presumably when there is no terminal ) 
-	er0 := run_and_capture("tmp4/hello_wide_world")
+	er0 := run_and_capture([]string{"tmp4/hello_wide_world"},nil)
 
 	if nil != er0.runerr {
 		t.Error("failure to run hello_wide_world from a differnet direcotry\n", er0.runerr )
 		t.Fail()
 	}
 
-	er1 := run_and_capture("tmp4/hello_wide_world")
+	er1 := run_and_capture([]string{"tmp4/hello_wide_world"},nil)
 
 	// we'll only want to compare some of the outputs. 	
 		d("er0.wd", string(er0.reportedwd))
@@ -438,6 +535,8 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 		d(string(er1.stdout))
 		d("\n")
 		d(string(er1.stderr))
+
+	// possibly redundant due to shell env PWD 
 	if er0.reportedwd != er1.reportedwd { 
 		d("er0.wd", string(er0.reportedwd))
 		d("\n")
@@ -448,55 +547,127 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 		t.Error("first and second call to hww give different wd\n" )
 	}
 
-	// check args
-	// next check the environments. 
 
-	// Do the same thing again, 
-	// but for executions that use relative PATH variables. 
+	testcompare_two_json_er( t , "calling up a directory",  er0 , er1  ) 
 
-	//	d("json unstringed : " , er.jsonblob ,"\n")
-	isdiff := false 
 
-	// should check for minimum keyset on er 
-	// reading json is a pita. 
+	os.Chdir("tmp4/tmp5")
+	defer os.Chdir ("../../")
 
-	if _ , exists := er0.jsonblob["environ"] ; ! exists  { 
-		t.Error("environ is not present in er0\n")
+	cmd = exec.Command("cp" ,"../../../../../hello_wide_world" ,".")
+	stdouterr , err = cmd.CombinedOutput()
+
+	if nil != err{
+		t.Error(err)
 	}
 
-	if _ , exists := er1.jsonblob["environ"] ; ! exists  { 
-		t.Error("environ is not present in er1\n")
+	d("doing er2\n")
+	er2 := run_and_capture([]string{"./hello_wide_world"},nil)
+
+	d("doing er3\n")
+	er3 := run_and_capture([]string{"./hello_wide_world"},nil)
+
+	testcompare_two_json_er( t, "relative path same dir", er2 ,er3 ) 
+
+
+	os.Chdir("tmp6")
+	defer os.Chdir("../")
+
+	cmd = exec.Command("cp" ,"../../../../../../hello_wide_world" ,".")
+	stdouterr , err = cmd.CombinedOutput()
+
+	if nil != err{
+		t.Error(err)
+		t.Fail()
 	}
 
-	// there must be a better way. FIX TODO, research Go idiums
+/*
 
-	stringslice0 := make([]string , len(er0.jsonblob["environ"].([]interface{})))
+	d("\n\n\n\n\nWHAT\n\n\n\n\n")
 
-	stringslice0 =  interfaceslicetostringslice(er0.jsonblob["environ"].([]interface{})) 
+	cmd = exec.Command("pwd")
+	stdouterr, err = cmd.CombinedOutput()
+	fmt.Print("pwd : " , string(stdouterr))
 
-	env0 := envslicetomapss(stringslice0)
 
-	stringslice1 := make([]string , len(er1.jsonblob["environ"].([]interface{})))
 
-	stringslice1 =  interfaceslicetostringslice(er1.jsonblob["environ"].([]interface{})) 
+	cmd = exec.Command("ls","-alrt")
+	stdouterr, err = cmd.CombinedOutput()
+	fmt.Print("ls -alrt : " , string(stdouterr))
 
-	env1 := envslicetomapss(stringslice1)
 
-	isdiff = comparemapsonkeys( []string { }, false , env0 , env1 )
+	cmd = exec.Command("bash","-c" ,"export",)
+	stdouterr, err = cmd.CombinedOutput()
+	fmt.Print("export : " , string(stdouterr))
+*/
+	//
+	// add . as the first thing in the PATH to test non anchorned calls. 
+	// 
 
-	if isdiff { 
-		t.Error("environment sets seem materially different, run with -args -debug to find out")
-	}
+	// my path , not it's path. 
 
-	// check argv really quick.
+	origpath , _  := os.LookupEnv("PATH")
+	defer os.Setenv("PATH",origpath)
 	
+	// just one dot, without the / is still valid..
+	os.Setenv("PATH","./:"+origpath)
 
-	if ! reflect.DeepEqual( er0.jsonblob["args"].([]interface{})  , er1.jsonblob["args"].([]interface{}) ){
-		t.Error("argument strings to the two invocations are different , see -args -debug \n")
+/*
+	saved := os.Enviorn() 
+	envmap := envslicetomapss(os.Environ())
+	d("\nenvmap ",envmap,"\n")
+
+	PATH, isok := envmap["PATH"]
+
+	if isok { 
+		envmap["PATH"] = "./:" + PATH +":./"
 	}
 
+	//delete(envmap,"PWD")
 
-	d("isdiff (" , isdiff , ")\n")
+	env := mapsstoenvslice(envmap)
+	d("\nenv : " , env )
+	d("\n\n")
+*/
+
+/*
+	d("what is it?\n")
+	ert1 := run_and_capture([]string{"ls","-alrt"}, nil)
+	fmt.Print("stdout : " ,string(ert1.stdout),"\n")
+	fmt.Print("stderr : " ,string(ert1.stderr),"\n")
+
+	ert2 := run_and_capture([]string{"bash","-c","export"}, nil)
+	fmt.Print("stdout : " ,string(ert2.stdout),"\n")
+	fmt.Print("stderr : " ,string(ert2.stderr),"\n")
+
+	ert3 := run_and_capture([]string{"head hello_wide_world"}, nil)
+	fmt.Print("stdout : " ,string(ert3.stdout),"\n")
+	fmt.Print("stderr : " ,string(ert3.stderr),"\n")
+*/
+
+	// . fails 
+	d("doing er4\n")
+
+	//er4 := run_and_capture("hello_wide_world" , append(os.Environ() , "PATH=./:/bin/:/usr/bin/:/usr/local/bin" ))
+	er4 := run_and_capture([]string{"hello_wide_world"}, nil)
+//	fmt.Print("stdout : " ,string(er4.stdout),"\n")
+//	fmt.Print("stderr : " ,string(er4.stderr),"\n")
+
+
+	d("doing er5\n")
+	//er5 := run_and_capture("hello_wide_world" , env)
+	er5 := run_and_capture([]string{"hello_wide_world"} , nil)
+//	fmt.Print("stdout : " ,string(er5.stdout),"\n")
+//	fmt.Print("stderr : " ,string(er5.stderr),"\n")
+
+	testcompare_two_json_er( t, "same pwd unancored via PATH", er4 ,er5 ) 
+
+
+//  	more along this line would be a good idea. 
+
+// 	
+
+
 
 	d("completed\n\n")
 }

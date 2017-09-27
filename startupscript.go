@@ -35,8 +35,8 @@ var Sutxt = `#!/bin/sh
 GOOS="uknown"
 GOARCH="unknown"
 
-# set -x 
-# export 
+#set -x 
+#export 
 
 if false; then 
 	pwd
@@ -260,6 +260,15 @@ execcanidate=""
 # ... and we'll need to return the possibly relative path from the users original dir perspective. 
 #
 #
+# 	This is a mess....
+#		different cases 
+#		a) startup script first time or startup script time X 
+#		b) found by relative or anchored path  vs found by PATH
+#		c) found by relative PATH vs anchored PATH	
+#
+#
+#
+#
 
 getself(){
 	TARG="$1" ; shift   # pass in $0 for simpler testing
@@ -279,6 +288,7 @@ getself(){
 			RELATIVEDIR=` + "`" + `dirname "$TARG"` + "`" + `
 			target_guess="${PREFIX}${RELATIVEDIR}/${EXECTARGET}.unpacked/goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}"	
 			target_guess_relative="${RELATIVEDIR}/${EXECTARGET}.unpacked/goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}"
+			target_guess_fullpath="$target_guess"
 		else 
 			# I don't know of a better plan than to walk through the PATH and find the first executable that looks right. 
 			PATHDIR=""
@@ -287,19 +297,37 @@ getself(){
 			if test x"$PREFIX" != x ; then 
 				cd "$PREFIX"
 			fi 
-	
+			
+			set -f 
+			OLDIFS="$IFS"
+			IFS=":"
 			for pathdir in $PATH
 			do	
+				
 				if test -x "$pathdir/$TARG"; then 
 					PATHDIR="$pathdir"
+					
+					# if the pathdir is relative, then we'll need to prepend the pwd for the file compares
+					if echo "$PATHDIR" | egrep -v '^/' ; then 
+						PWD=` + "`" + `pwd` + "`" + `
+						FULLPATHDIR="$PWD/$PATHDIR"
+					else 
+						false	
+					fi	
 					break	
 				fi
 			done
-			cd "$savedPWD" ; # ouch.. 
-	
+			set +f 	
+			IFS="$OLDIFS"
+			unset OLDIFS
+
+			cd "$savedPWD" ; # ouch.. dd
+
+
 			if test x"$PATHDIR" != x; then 
 				target_guess="${PATHDIR}/${EXECTARGET}.unpacked/goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}"
 				target_guess_relative="$target_guess"
+				target_guess_fullpath="${FULLPATHDIR}/${EXECTARGET}.unpacked/goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}"
 			else
 				echo "Unable to find ($TARG) in path.... or on the filesystem... where do I come from anyway?($PREFIX)(quiting)"
 				exit 7
@@ -312,12 +340,12 @@ getself(){
 
 	if test "unknown" != "$GOOS" -a "unkown" != "$GOARCH"; then 
 		
-		if test -f "$target_guess"
+		if test -f "$target_guess_fullpath"
 		then
 	#		echo "yippie, time to go"
 			#exec "$target_guess"
 			execcanidate="$target_guess_relative" 
-		elif test -f "$target_guess.exe"
+		elif test -f "$target_guess_fullpath.exe"
 		then
 	#		echo "time to windows"
 			execcanidate="$target_guess_relative.exe" # if that even works
