@@ -31,7 +31,8 @@
 GOOS="uknown"
 GOARCH="unknown"
 
-#set -x 
+# set -x 
+# export 
 
 if false; then 
 	pwd
@@ -244,48 +245,61 @@ execcanidate=""
 
 
 #
-# fall back strategy of ... try them all and see what works. 
-#	which is horrible because some of them core dump and such ( or launch qeum and have that fail ) 
- 
+# given a prefix "" being pwd attempt to find $0 
+#
+#  
+# 
+#  getself / getexeccandiate are two distinct ideas, and differnt. 
+# 
+#	getexeccandiate is the underlying GOOS_GOARCH EXECTARGET that needs to get run. 
+#
 
-getexeccanidate(){
+getself(){
+	TARG="$1" ; shift   # pass in $0 for simpler testing
+	PREFIX="$1"
 
-	#
-	## @$!#@$ windows...
-	#
+	# clunky
+	if test -z "$PREFIX"; then 
+		true
+	else 
+		PREFIX="$PREFIX/"
+	fi
 
-
-	if test x"$RANASSTARTUPSCRIPT" = xy; then 
-		target_guess="goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}" 
-	else
-		# we need to recover the relative directory to the right place. 
 	
+
 		# if the path is relative or absolute, we are good and simple 
-		if echo "$0" | egrep '^(\./|\.\./|/|.*/.*)' >/dev/null; then  # that simplifies... to (/|.*/.*)  # fix test. can we get rid of egrep / grep ?  TODO xxx
-			RELATIVEDIR=`dirname "$0"`
-			target_guess="${RELATIVEDIR}/${EXECTARGET}.unpacked/goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}"	
+		if echo "$TARG" | egrep '^(\./|\.\./|/|.*/.*)' >/dev/null; then  # that simplifies... to (/|.*/.*)  # fix test. can we get rid of egrep / grep ?  TODO xxx
+			RELATIVEDIR=`dirname "$TARG"`
+			target_guess="${PREFIX}${RELATIVEDIR}/${EXECTARGET}.unpacked/goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}"	
 		else 
 			# I don't know of a better plan than to walk through the PATH and find the first executable that looks right. 
 			PATHDIR=""
+			savedPWD=`pwd`  
+
+			if test x"$PREFIX" != x ; then 
+				cd "$PREFIX"
+			fi 
+	
 			for pathdir in $PATH
 			do	
-				if test -x "$pathdir/$0"; then 
+				if test -x "$pathdir/$TARG"; then 
 					PATHDIR="$pathdir"
 					break	
 				fi
 			done
+			cd "$savedPWD" ; # ouch.. 
 	
 			if test x"$PATHDIR" != x; then 
 				target_guess="${PATHDIR}/${EXECTARGET}.unpacked/goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}"
 			else
-				echo "Unable to find ($0) in path.... or on the filesystem... where do I come from anyway?(quiting)"
+				echo "Unable to find ($TARG) in path.... or on the filesystem... where do I come from anyway?($PREFIX)(quiting)"
 				exit 7
 			fi
 
 			# echo "dev quit, on relative paths for now"
 			# exit 2; 
 		fi
-	fi
+	
 
 	if test "unknown" != "$GOOS" -a "unkown" != "$GOARCH"; then 
 		
@@ -309,11 +323,27 @@ getexeccanidate(){
 		echo "okay not yet, quiting"
 		exit 4
 	fi
-}
+	
+} 
+
+
 
 
 probe_for_goos_goarch
-getexeccanidate
+
+
+# getexeccanidate
+if test x"$RANASSTARTUPSCRIPT" = xy; then 
+ 	#	target_guess="goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}" 
+	#
+	cwd=`pwd`
+	# so we need to figure out the $0 of our parent.. that'll take a bit.  or we could just mule in our data with USER_PWD
+	# 
+	#echo "F IX HERE @" .... NAHH
+	getself "$MS_DOLLAR_ZERO" "$MS_USER_PWD" # not as horrible as it may seem
+else 
+	getself "$0" ""
+fi
 
 if false; then  
 	echo "(${GOOS}_${GOARCH})"
@@ -351,7 +381,19 @@ if test "$MODE" = "passthrough"; then
 
 	switcheru
 
+	# FIX, such a commonly possibly variable is less safe.  ( USER_PWD ) 
 	if test x"$RUNGOAPP" = xy; then
+		cd "$MS_USER_PWD"
+		unset MS_USER_PWD 
+		unset MS_DOLLAR_ZERO
+		# there may be a semi infinitie number of keys like this on different systems. we'll need to weed through them.
+		if test x"$MS_OLDPWD" != x; then 
+			if test x"OLDPWD" != x ; then 
+				OLDPWD="$MS_OLDPWD" 
+			fi 
+		fi
+		unset MS_OLDPWD
+		# fixup the execcanidate from the perspective of the USER_PWD
 		exec "$execcanidate" $@
 	else
 		echo "not running go app for some reason";

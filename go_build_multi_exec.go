@@ -40,6 +40,22 @@ package main
 		
 		d) todo : 
 			realtive and path based things seem to work.. there are now enough test cases where we'll need to automate up this thing.... so twisty
+
+			Test plan : ( pre checkin / post checkin tests ) 
+			/ a) does it compile ( given some set of os/architectures ) 
+			b) does it produce an artifact with the right name (^^)
+			c) ( is there other junk around the build dir?)
+			d) for a set of different conditions what does the thing do when executed first, second and thrid times? 
+				i) tmp dir with copied artifact into it 	
+				ii) tmpdir with artifact /  different working dir, higher, lower in the fs tree 
+				iii) different perms on the files / directories? 
+			e) do the above - compilation, on each different os/arch we can get running simply 
+			d) above in light of failure cases, e.g. permissions issues, disk space issues, or chatter? 
+			f) using a different test artifact than hello_wide_world, maybe one that includes more external libs. ( does dynamic lnking cross compiling work enough?) 
+				
+			... okay getting that some ways toward done. 
+			
+			
 	
 
 
@@ -103,6 +119,7 @@ import (
 
 
 var debugflg = false
+var leavetmp = false 
 
 
 //
@@ -191,23 +208,21 @@ func clean_and_build_goos_goarch(){
 
 
 
+
 	// what is the binname going to be? 
 
 	buildtarget := get_build_target()
 	unpackeddir := buildtarget + ".unpacked/"
 
-	check(os.MkdirAll(unpackeddir,0755))
-
-
-	if _,filerr := os.Stat(unpackeddir + "goos_goarch") ; nil != filerr  {
-		// wont' work well on plan9/windows? no idea . fix with pure go later. 
-		rmoldcmd := exec.Command("rm","-rf",unpackeddir + "goos_goarch")
-		rmouterr,rmerr := rmoldcmd.CombinedOutput()
-		if nil != rmerr { 
-			fmt.Print(rmouterr)
-			panic(rmerr)
-		}
+	// proactive cleanup
+	if _,filerr := os.Stat(unpackeddir) ; nil == filerr  {
+		d("removing unpackeddir\n")
+		os.RemoveAll(unpackeddir)
 	}
+
+
+	check(os.MkdirAll(unpackeddir+"goos_goarch",0755))
+
 
 
 	for  _ ,  goos := range goosSlice {
@@ -252,9 +267,11 @@ func clean_and_build_goos_goarch(){
 	//			fmt.Print(builderr)
 				fmt.Print(" .. build didn't work moving on\n");
 			}
-
 		}
 	}
+
+
+
 }
 
 
@@ -375,6 +392,7 @@ func main(){
 	flag.BoolVar(&devgentxtgo,"devgenmaketxtgo" , false , "an internal thing to allow us to bring the makeself and start scripts into the binary as strings rather than having multiple files laying around, dev use only")
 
 	flag.BoolVar(&debugflg , "debug", false , "more verbose debuggin is enabled, more junk to the stdout/stderr")
+	flag.BoolVar(&leavetmp, "leavetmp", false , "a debugging flag to leave open makeself stuff and archive")
 
 	flag.Parse()
 
@@ -391,13 +409,15 @@ func main(){
 	goosSlice = strings.Split(arggooscommalist,",")
 	goarchSlice = strings.Split(arggoarchcommalist,",")
 
-	
-	
+
+	// bahhh, just make a tempdir somewhere..
+	buildtarget := get_build_target()
+	unpackeddir := buildtarget + ".unpacked"
+
+
 	clean_and_build_goos_goarch()
 	drop_copy_of_makeself()
 
-	buildtarget := get_build_target()
-	unpackeddir := buildtarget + ".unpacked"
 
 	check(os.MkdirAll(unpackeddir,0755))
 
@@ -406,7 +426,7 @@ func main(){
 	// "./makeself.sh --target 
 
 	// fido is a place holder
-	cmd := exec.Command("./makeself.sh" ,"--noprogress" , "--target" , unpackeddir , unpackeddir , buildtarget , "multi architecture self installing go build of " + buildtarget , "./startupscript")
+	cmd := exec.Command("./makeself.sh" ,"--nox11", "--noprogress" , "--target" , unpackeddir , unpackeddir , buildtarget , "multi architecture self installing go build of " + buildtarget , "./startupscript")
 	
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr 
@@ -414,6 +434,16 @@ func main(){
 	err := cmd.Run()
 
 	check(err)
+
+	if ! leavetmp {
+		d("removing working files\n")
+		os.RemoveAll(unpackeddir)
+		os.Remove("makeself.sh")
+		os.Remove("makeself-header.sh")
+	}else{
+		d("leaving working files\n")
+	}
+
 	fmt.Print("Successfull completion maybe\n")
 
 }

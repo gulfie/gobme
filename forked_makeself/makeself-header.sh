@@ -11,7 +11,9 @@ fi
 CRCsum="$CRCsum"
 MD5="$MD5sum"
 TMPROOT=\${TMPDIR:=/tmp}
-USER_PWD="\$PWD"; export USER_PWD
+MS_USER_PWD="\$PWD"; export MS_USER_PWD
+MS_DOLLAR_ZERO="\$0"; export MS_DOLLAR_ZERO
+MS_OLDPWD="\$PWD"; export MS_OLDPWD
 
 label="$LABEL"
 script="$SCRIPT"
