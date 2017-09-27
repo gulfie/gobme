@@ -15,11 +15,11 @@ package main
 			x a) be quite 
 			xb) take side channle commands ( e.g. just install, or install over here )  and ignore archiver commands? 
 				
-			/ c) (startup script?) exec the correct thing out of the goos_goarch tree 
+			x c) (startup script?) exec the correct thing out of the goos_goarch tree 
 				rename to app_launcher_and_multi_exec_ctl   alamec ? ... something.
 
-			/ d) does exec from non local dir work.
-			/ e) switcheru the goos_goarch/thing into the place of the original .shar  ( move the orignial .shar to maybe something.multi )
+			x d) does exec from non local dir work.
+			x e) switcheru the goos_goarch/thing into the place of the original .shar  ( move the orignial .shar to maybe something.multi )
 			(no) f) optional remove everything besides the switcheru bin.... option default to no.
 			(not yet) g) (punt on, but) figure out the case of perms not right for this user to unarchvie it ( $HOME/.go_multi/ maybe?) ... maybe just run the thing... 
 		
@@ -35,17 +35,17 @@ package main
 
 		c) todo : 
 			strip out comments / debug / dev stuff 
-			harden against diff users and diff pwd 
-			import the script as a literal
+			/ harden against diff users and diff pwd 
+			x import the script as a literal
 		
 		d) todo : 
 			realtive and path based things seem to work.. there are now enough test cases where we'll need to automate up this thing.... so twisty
 
 			Test plan : ( pre checkin / post checkin tests ) 
-			/ a) does it compile ( given some set of os/architectures ) 
-			b) does it produce an artifact with the right name (^^)
-			c) ( is there other junk around the build dir?)
-			d) for a set of different conditions what does the thing do when executed first, second and thrid times? 
+			x a) does it compile ( given some set of os/architectures ) 
+			x b) does it produce an artifact with the right name (^^)
+			x c) ( is there other junk around the build dir?)
+			/ d) for a set of different conditions what does the thing do when executed first, second and thrid times? 
 				i) tmp dir with copied artifact into it 	
 				ii) tmpdir with artifact /  different working dir, higher, lower in the fs tree 
 				iii) different perms on the files / directories? 
@@ -55,8 +55,6 @@ package main
 				
 			... okay getting that some ways toward done. 
 			
-			
-	
 
 
 
@@ -69,20 +67,24 @@ package main
 			x 0) precheck with a build of the local arch, if it fails, fail quick
 				test? 
 			x 1) paramiterize the build target goos and goarch into lists /sets 
-			/ 2) --dev flag to use filse for makeself
+			/ 2) -dev flag to use filse for makeself
 				2.a) debug / verbose ? 
 			3) readme.md including license incumbering by gnu 
 				recomendations to swap out makeself for a go compatable something ( keep thank you to makeself team, cuz' awesome) 
-			4) start the testing? 
-				a) do some dev in shell, then consider migrating to pure go. 
-			5) see what's up with the $GOROOT adn GOPATH on disk structures?  how can we fit into that reasonably? 
-			6) move makeself into the gobme tree 
-			7) github
+			/ 4) start the testing? 
+				/ a) do some dev in shell, then consider migrating to pure go. 
+			x 5) see what's up with the $GOROOT adn GOPATH on disk structures?  how can we fit into that reasonably? 
+			x 6) move makeself into the gobme tree 
+			x 7) github
 			8) hostify? 
 			9) deltizer? 
 			10) telemetry packages? 				
 			11) a load balancer? 
 			12) style consistency...
+			13) different OS testing. 
+				13.a) compiling on FreeBSD 
+				13.b) running on OpenBSD 
+			
 	
 
 */
