@@ -170,5 +170,12 @@ x@desk6:
   
 
 
+#### dev notes. 
+
+A safer TDD loop : 
+(go build && ./gobme -devgenmaketxtgo && go build && go test -v -args -debug  )
+
+
+
 
 
