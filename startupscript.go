@@ -257,6 +257,9 @@ execcanidate=""
 # 
 #	getexeccandiate is the underlying GOOS_GOARCH EXECTARGET that needs to get run. 
 #
+# ... and we'll need to return the possibly relative path from the users original dir perspective. 
+#
+#
 
 getself(){
 	TARG="$1" ; shift   # pass in $0 for simpler testing
@@ -275,6 +278,7 @@ getself(){
 		if echo "$TARG" | egrep '^(\./|\.\./|/|.*/.*)' >/dev/null; then  # that simplifies... to (/|.*/.*)  # fix test. can we get rid of egrep / grep ?  TODO xxx
 			RELATIVEDIR=` + "`" + `dirname "$TARG"` + "`" + `
 			target_guess="${PREFIX}${RELATIVEDIR}/${EXECTARGET}.unpacked/goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}"	
+			target_guess_relative="${RELATIVEDIR}/${EXECTARGET}.unpacked/goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}"
 		else 
 			# I don't know of a better plan than to walk through the PATH and find the first executable that looks right. 
 			PATHDIR=""
@@ -295,6 +299,7 @@ getself(){
 	
 			if test x"$PATHDIR" != x; then 
 				target_guess="${PATHDIR}/${EXECTARGET}.unpacked/goos_goarch/${GOOS}_${GOARCH}/${EXECTARGET}"
+				target_guess_relative="$target_guess"
 			else
 				echo "Unable to find ($TARG) in path.... or on the filesystem... where do I come from anyway?($PREFIX)(quiting)"
 				exit 7
@@ -311,11 +316,11 @@ getself(){
 		then
 	#		echo "yippie, time to go"
 			#exec "$target_guess"
-			execcanidate="$target_guess" 
+			execcanidate="$target_guess_relative" 
 		elif test -f "$target_guess.exe"
 		then
 	#		echo "time to windows"
-			execcanidate="$target_guess.exe" # if that even works
+			execcanidate="$target_guess_relative.exe" # if that even works
 		else
 			echo "there was no matching execuable around ($target_guess), quiting."
 			exit 3
@@ -388,6 +393,7 @@ if test "$MODE" = "passthrough"; then
 	# FIX, such a commonly possibly variable is less safe.  ( USER_PWD ) 
 	if test x"$RUNGOAPP" = xy; then
 		cd "$MS_USER_PWD"
+
 		unset MS_USER_PWD 
 		unset MS_DOLLAR_ZERO
 		# there may be a semi infinitie number of keys like this on different systems. we'll need to weed through them.

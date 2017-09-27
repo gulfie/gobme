@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"bytes"
 	"encoding/json"
+	"reflect"
 	//"math"
 )
 
@@ -456,6 +457,7 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 	//	d("json unstringed : " , er.jsonblob ,"\n")
 	isdiff := false 
 
+	// should check for minimum keyset on er 
 	// reading json is a pita. 
 
 	if _ , exists := er0.jsonblob["environ"] ; ! exists  { 
@@ -482,12 +484,20 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 
 	isdiff = comparemapsonkeys( []string { }, false , env0 , env1 )
 
-	if env0 == nil { 
-		env0 = env1 
+	if isdiff { 
+		t.Error("environment sets seem materially different, run with -args -debug to find out")
 	}
+
+	// check argv really quick.
 	
+
+	if ! reflect.DeepEqual( er0.jsonblob["args"].([]interface{})  , er1.jsonblob["args"].([]interface{}) ){
+		t.Error("argument strings to the two invocations are different , see -args -debug \n")
+	}
+
+
 	d("isdiff (" , isdiff , ")\n")
-	
+
 	d("completed\n\n")
 }
 
