@@ -129,8 +129,10 @@ var leavetmp = false
 //  rooting around the filesystem seems rude at this point. e.g. ( ./runtime/internal/sys/gengoos.go )
 //   
 
-	// android nacl , both taken out because it looks like we can't run them.
+// android nacl , both taken out because it looks like we can't run them.
+// atman is in the same boat ( https://github.com/atmanos/atmanos ) 
 var fullgooscommalist = "android,darwin,dragonfly,freebsd,linux,nacl,netbsd,openbsd,plan9,solaris,windows,zos"
+	
 var arggooscommalist string
 // [...]string { "darwin" , "dragonfly" , "freebsd" , "linux" , "netbsd" , "openbsd" , "plan9" , "solaris" , "windows" , "zos"  } 
 //var goosSlice = [...]string { "dragonfly" , "freebsd" , "linux" }
