@@ -86,6 +86,13 @@ package main
 				13.b) running on OpenBSD 
 			
 	
+	TODO3: 
+		Interesting idea... security.txt 
+		https://securitytxt.org/ 
+		
+		add flag to GO_MULTI_ALAMEC_ARGS , to allow for 'just show me the security.txt for this thing' 
+
+
 
 */
 
