@@ -234,7 +234,7 @@ type execrecord struct {
 
 // exec style env strings. nil == what you have already 
 // convert cmdstr to  a []string
-func run_and_capture(cmdstr []string, env []string) (er execrecord){
+func runAndCapture(cmdstr []string, env []string) (er execrecord){
 
 	cmd := exec.Command(cmdstr[0], cmdstr[1:]...)
 
@@ -301,7 +301,7 @@ func interfaceslicetostringslice( inslice []interface{} ) ( outslice []string ){
 //	d(" inslice ", inslice , "\n")
 
 
-	for i , _ := range(inslice){
+	for i := range(inslice){
 		outslice = append(outslice, inslice[i].(string))
 	}
 
@@ -419,7 +419,7 @@ func comparemapsonkeys( keyset []string, onlycheck bool, left map[string]string 
 
 
 
-func testcompare_two_json_er( t *testing.T, testprefix string,  left , right execrecord)  ( isgood bool) { 
+func testcompareTwoJSONEr( t *testing.T, testprefix string,  left , right execrecord)  ( isgood bool) { 
 
 	// check args
 	// next check the environments. 
@@ -649,18 +649,18 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 	d("doing er4\n")
 
 	//er4 := run_and_capture("hello_wide_world" , append(os.Environ() , "PATH=./:/bin/:/usr/bin/:/usr/local/bin" ))
-	er4 := run_and_capture([]string{"hello_wide_world"}, nil)
+	er4 := runAndCapture([]string{"hello_wide_world"}, nil)
 //	fmt.Print("stdout : " ,string(er4.stdout),"\n")
 //	fmt.Print("stderr : " ,string(er4.stderr),"\n")
 
 
 	d("doing er5\n")
 	//er5 := run_and_capture("hello_wide_world" , env)
-	er5 := run_and_capture([]string{"hello_wide_world"} , nil)
+	er5 := runAndCapture([]string{"hello_wide_world"} , nil)
 //	fmt.Print("stdout : " ,string(er5.stdout),"\n")
 //	fmt.Print("stderr : " ,string(er5.stderr),"\n")
 
-	testcompare_two_json_er( t, "same pwd unancored via PATH", er4 ,er5 ) 
+	testcompareTwoJSONEr( t, "same pwd unancored via PATH", er4 ,er5 ) 
 
 
 //  	more along this line would be a good idea. 
