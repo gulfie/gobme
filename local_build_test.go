@@ -515,14 +515,14 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 	//  pause and think for a  bit. 
 
 	// oh neat... makeself helpfully pops up a window with startup script output (presumably when there is no terminal ) 
-	er0 := run_and_capture([]string{"tmp4/hello_wide_world"},nil)
+	er0 := runAndCapture([]string{"tmp4/hello_wide_world"},nil)
 
 	if nil != er0.runerr {
 		t.Error("failure to run hello_wide_world from a differnet direcotry\n", er0.runerr )
 		t.Fail()
 	}
 
-	er1 := run_and_capture([]string{"tmp4/hello_wide_world"},nil)
+	er1 := runAndCapture([]string{"tmp4/hello_wide_world"},nil)
 
 	// we'll only want to compare some of the outputs. 	
 		d("er0.wd", string(er0.reportedwd))
@@ -548,7 +548,7 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 	}
 
 
-	testcompare_two_json_er( t , "calling up a directory",  er0 , er1  ) 
+	testcompareTwoJSONEr( t , "calling up a directory",  er0 , er1  ) 
 
 
 	os.Chdir("tmp4/tmp5")
@@ -562,12 +562,12 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 	}
 
 	d("doing er2\n")
-	er2 := run_and_capture([]string{"./hello_wide_world"},nil)
+	er2 := runAndCapture([]string{"./hello_wide_world"},nil)
 
 	d("doing er3\n")
-	er3 := run_and_capture([]string{"./hello_wide_world"},nil)
+	er3 := runAndCapture([]string{"./hello_wide_world"},nil)
 
-	testcompare_two_json_er( t, "relative path same dir", er2 ,er3 ) 
+	testcompareTwoJSONEr( t, "relative path same dir", er2 ,er3 ) 
 
 
 	os.Chdir("tmp6")
