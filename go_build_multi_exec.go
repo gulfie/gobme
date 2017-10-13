@@ -94,7 +94,9 @@ package main
 		
 		add flag to GO_MULTI_ALAMEC_ARGS , to allow for 'just show me the security.txt for this thing' 
 
-
+	TODO4: 
+		more testing 
+		TEST the texts of the mshtxt.go mstxt.go and   startupscript.go and compares them to the text on disk for the sources. e.g. ( was the devgenmaketxtgo run? ) 
 
 */
 
