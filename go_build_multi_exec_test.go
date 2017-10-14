@@ -667,9 +667,46 @@ func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 
 // 	
 
-
-
 	d("completed\n\n")
+}
+
+
+
+func Test_Files(t *testing.T){
+
+	// fmt.Print( os.Getwd())
+	// fmt.Print("\n")
+
+	for _ , v := range relativefn { 
+                srcfn,dstfn,varname := v[0] , v[1], v[2] 
+                // for some reason we are getting run in gobme/hello_wide_world ... neat 
+		// investigate after fixup hack. 
+		// also check new version of go.
+                bytetxt , err := ioutil.ReadFile("../" + srcfn)
+                if nil != err { 
+                        panic(err)
+                }
+
+                strtxt := srcfileToGofiletxt( string(bytetxt) , srcfn, varname ) 
+
+		// now compare the sourcetext with what's on disk. 
+
+		currenttxt, err := ioutil.ReadFile("../" + dstfn)
+		if nil !=  err {
+			panic(err)
+		}
+
+
+		if strtxt != string(currenttxt) {
+			t.Error("The file ("+srcfn+") and the transformed output to ("+dstfn+") are nolonger correct, please run -devgenmaketxtgo\n")
+		}else{
+			d("the files("+srcfn+")  ("+dstfn+") are okay\n")
+		}
+
+	}
+
+
+
 }
 
 
