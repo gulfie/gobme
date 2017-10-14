@@ -80,8 +80,8 @@ func Test_simple_building(t *testing.T){
 
 func Test_simple_building_hello(t *testing.T){
 
-	// test hardness may do this.
-/*
+	// test hardness may do this. ( it does not ) 
+
 	origwd , wderr := os.Getwd()
 
 	if nil != wderr {
@@ -89,9 +89,10 @@ func Test_simple_building_hello(t *testing.T){
 		t.Fail()
 	}
 	defer os.Chdir(origwd)
-*/	
 
 	os.Chdir("hello_wide_world")
+
+
 
 	cmd := exec.Command("go","clean"); // assume clean GOOS GOARCH
 
@@ -123,15 +124,16 @@ func Test_simple_building_hello(t *testing.T){
 // plan, execute the native hello
 func Test_simple_use_hello(t *testing.T){
 
-	// test hardness may do this.
-/*	origwd , wderr := os.Getwd()
+	// test hardness may do this. ( it does not ) 
+
+	origwd , wderr := os.Getwd()
 
 	if nil != wderr {
 		t.Error("Can not get working directory");
 		t.Fail()
 	}
 	defer os.Chdir(origwd)
-*/
+
 	os.Chdir("hello_wide_world")
 
 	cmd := exec.Command("./hello_wide_world")
@@ -162,6 +164,16 @@ func Test_simple_gobme_of_hww(t *testing.T){
 	}
 	defer os.Chdir(origwd)
 */
+	// test hardness may do this. ( it does not ) 
+
+	origwd , wderr := os.Getwd()
+
+	if nil != wderr {
+		t.Error("Can not get working directory");
+		t.Fail()
+	}
+	defer os.Chdir(origwd)
+
 	os.Chdir("hello_wide_world")
 
 	previousDirSlice, _  := ioutil.ReadDir("./")
@@ -487,6 +499,16 @@ func testcompareTwoJSONEr( t *testing.T, testprefix string,  left , right execre
 // 
 func Test_simple_gobme_of_hww_local_usage(t *testing.T){
 
+	// test hardness may do this. ( it does not ) 
+
+	origwd , wderr := os.Getwd()
+
+	if nil != wderr {
+		t.Error("Can not get working directory");
+		t.Fail()
+	}
+	defer os.Chdir(origwd)
+
 	os.Chdir("hello_wide_world")
 
 	// should have our hello_wide_world archive built. 
@@ -682,7 +704,7 @@ func Test_Files(t *testing.T){
                 // for some reason we are getting run in gobme/hello_wide_world ... neat 
 		// investigate after fixup hack. 
 		// also check new version of go.
-                bytetxt , err := ioutil.ReadFile("../" + srcfn)
+                bytetxt , err := ioutil.ReadFile(srcfn)
                 if nil != err { 
                         panic(err)
                 }
@@ -691,7 +713,7 @@ func Test_Files(t *testing.T){
 
 		// now compare the sourcetext with what's on disk. 
 
-		currenttxt, err := ioutil.ReadFile("../" + dstfn)
+		currenttxt, err := ioutil.ReadFile(dstfn)
 		if nil !=  err {
 			panic(err)
 		}
